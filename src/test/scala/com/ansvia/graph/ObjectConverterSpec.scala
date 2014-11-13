@@ -99,7 +99,7 @@ class ObjectConverterSpec extends Specification {
         v4o.age = 5
         v4o.kind = "mamalia"
         val v4 = v4o.save()
-        val v4ob = v4.toCC[Animal].get
+        val v4ob = v4.toCC[Animal]().get
 
         val v3 = Motor("Honda").save()
         v3 --> "hit" --> v4ob
@@ -107,7 +107,7 @@ class ObjectConverterSpec extends Specification {
 
         val nemoDraft = SeaFish("yellow")
         nemoDraft.name = "nemo"
-        val nemo = nemoDraft.save().toCC[SeaFish].get
+        val nemo = nemoDraft.save().toCC[SeaFish]().get
 
         val sharkDraft = Shark("Hammer head")
         sharkDraft.name = "the killer"
@@ -115,7 +115,7 @@ class ObjectConverterSpec extends Specification {
         sharkDraft.eatable = false
         sharkDraft.children = 3 // this should not saved
         sharkDraft.animalProtected = true // should saved using custom __save__()
-        val shark = sharkDraft.save().toCC[Shark].get
+        val shark = sharkDraft.save().toCC[Shark]().get
 
         def close(){
             db.shutdown()
@@ -128,11 +128,11 @@ class ObjectConverterSpec extends Specification {
         def saveDirectlyUsingSave = v3.isInstanceOf[Vertex] must beTrue
         def hasExpectedField = v3.has("mark") must beTrue
         def getBackSavedFieldData = v3.get[String]("mark").getOrElse("mark", "esemka") must beEqualTo("Honda")
-        def deserializable = v3.toCC[Motor].isDefined must beTrue
-        def expectedDataDeserializedObj = v3.toCC[Motor].get.mark must beEqualTo("Honda")
+        def deserializable = v3.toCC[Motor]().isDefined must beTrue
+        def expectedDataDeserializedObj = v3.toCC[Motor]().get.mark must beEqualTo("Honda")
         def getRawVertexFromCC = v4ob.getVertex must beEqualTo(v4)
         def makeRelDbo2Dbo = v4ob.getVertex.pipe.in("hit").headOption.isDefined must beTrue
-        def makeRelDbo2Dbo2 = v4ob.getVertex.pipe.in("hit").headOption.get.toCC[Motor].get.mark must beEqualTo("Honda")
+        def makeRelDbo2Dbo2 = v4ob.getVertex.pipe.in("hit").headOption.get.toCC[Motor]().get.mark must beEqualTo("Honda")
         def savedDboRetTrue = (v4o.isSaved && v4ob.isSaved) must beTrue
         def ccContainLazyNotError = ContainLazy(1).save() must not equalTo(null)
         def accessUpperVar1 = nemo.name must beEqualTo("nemo")

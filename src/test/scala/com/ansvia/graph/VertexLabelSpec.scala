@@ -101,8 +101,8 @@ class VertexLabelSpec extends Specification with TitanBackedDb {
 
             idGraphTitanDb.commit()
 
-            v.toCC[Animal] must_!= None
-            v.toCC[Animal].get.name must_== "bear"
+            v.toCC[Animal]() must_!= None
+            v.toCC[Animal]().get.name must_== "bear"
         }
         "saved vertex has id immediately" in new Ctx3 {
             import IdGraphTitanDbWrapper._
@@ -142,7 +142,7 @@ class VertexLabelSpec extends Specification with TitanBackedDb {
 
             v must_!= null
 
-            val tiger = v.toCC[Animal].get
+            val tiger = v.toCC[Animal]().get
 
             tiger.getVertex must_== v
             tiger.name must_== "tiger"

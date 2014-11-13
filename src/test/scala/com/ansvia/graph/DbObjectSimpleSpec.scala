@@ -42,10 +42,10 @@ class DbObjectSimpleSpec extends Specification {
         implicit val db = TinkerGraphFactory.createTinkerGraph()
 
         val dboDraft = SimpleDbo("a", "b")
-        val dbo = dboDraft.save().toCC[SimpleDbo].get
+        val dbo = dboDraft.save().toCC[SimpleDbo]().get
 
         val dbo2Draft = IdSimpleDbo("b", "c")
-        val dbo2 = dbo2Draft.save().toCC[IdSimpleDbo].get
+        val dbo2 = dbo2Draft.save().toCC[IdSimpleDbo]().get
 
         def close(){
             db.shutdown()
@@ -60,7 +60,7 @@ class DbObjectSimpleSpec extends Specification {
         def changeProperty = {
             dbo.b = "d"
             dbo.save()
-            db.getVertex(dbo.getId).toCC[SimpleDbo].get.b must beEqualTo("d")
+            db.getVertex(dbo.getId).toCC[SimpleDbo]().get.b must beEqualTo("d")
         }
         
         def useGetId = {
@@ -69,7 +69,7 @@ class DbObjectSimpleSpec extends Specification {
         }
 
         def useGetIdDbObject = {
-            val d = db.getVertex(dbo2.getVertex.getId).toCC[IdSimpleDbo].get
+            val d = db.getVertex(dbo2.getVertex.getId).toCC[IdSimpleDbo]().get
             d.getId must beEqualTo(dbo2.getId)
         }
 
@@ -93,13 +93,13 @@ class DbObjectSimpleSpec extends Specification {
 
         val dboDraft = SimpleDboLong("a", "b")
         val dbo = transact {
-            dboDraft.save().toCC[SimpleDboLong].get
+            dboDraft.save().toCC[SimpleDboLong]().get
         }
 
 
         val dbo2Draft = IdSimpleDboLong("b", "c")
         val dbo2 = transact {
-            dbo2Draft.save().toCC[IdSimpleDboLong].get
+            dbo2Draft.save().toCC[IdSimpleDboLong]().get
         }
 
 
@@ -117,7 +117,7 @@ class DbObjectSimpleSpec extends Specification {
             dbo.b = "d"
             dbo.save()
             db.commit()
-            db.getVertex(dbo.getId).toCC[SimpleDboLong].get.b must beEqualTo("d")
+            db.getVertex(dbo.getId).toCC[SimpleDboLong]().get.b must beEqualTo("d")
         }
 
         def useGetId = {
@@ -126,7 +126,7 @@ class DbObjectSimpleSpec extends Specification {
         }
 
         def useGetIdDbObject = {
-            val d = db.getVertex(dbo2.getVertex.getId).toCC[IdSimpleDboLong].get
+            val d = db.getVertex(dbo2.getVertex.getId).toCC[IdSimpleDboLong]().get
             d.getId must beEqualTo(dbo2.getId)
         }
 
