@@ -25,7 +25,7 @@ class AbstractIDGetterSpec extends Specification {
 
     "Abstract ID getter" should {
         "using it" in new Ctx {
-            v.toCC[ModelUsingAbstractIDGetter].get must beAnInstanceOf[ModelUsingAbstractIDGetter]
+            v.toCC[ModelUsingAbstractIDGetter]().get must beAnInstanceOf[ModelUsingAbstractIDGetter]
         }
     }
 

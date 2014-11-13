@@ -32,7 +32,7 @@ class DbObjectComplexSpec extends Specification {
         complexDraft.a = 1
         complexDraft.b = 2
         complexDraft.c = 3
-        val complex = complexDraft.save().toCC[Complex].get
+        val complex = complexDraft.save().toCC[Complex]().get
 
         def close(){
             db.shutdown()
