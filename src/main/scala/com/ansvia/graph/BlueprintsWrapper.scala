@@ -117,11 +117,17 @@ object BlueprintsWrapper {
         /**
          * Deserialize object to case class.
          * @tparam T case class type.
-         * @return
          */
-        def toCC[T: ClassTag](classLoader: ClassLoader = defaultClassloader):Option[T] = {
-            ObjectConverter.toCC[T](obj, classLoader)
-        }
+        def toCC[T: ClassTag]:Option[T] = toCC[T](defaultClassloader)
+
+      /**
+       * Deserialize object to case class.
+       * @tparam T case class type.
+       * @param classLoader explicitly specified classloader if needed.
+       */
+      def toCC[T: ClassTag](classLoader: ClassLoader):Option[T] = {
+        ObjectConverter.toCC[T](obj, classLoader)
+      }
     }
 
     implicit def vertexToPropertyAccessor(elm:Vertex) = ScalasticPropertyAccessor(elm)
