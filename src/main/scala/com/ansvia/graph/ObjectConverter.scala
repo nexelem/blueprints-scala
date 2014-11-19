@@ -18,6 +18,8 @@ import reflect.ClassTag
 import scala.collection.mutable
 import com.ansvia.graph.Exc.BlueprintsScalaException
 
+import scala.reflect.runtime.universe.TypeTag
+
 object ObjectConverter extends Log {
 
     /**
@@ -67,7 +69,7 @@ object ObjectConverter extends Log {
      * Some(T) if possible
      * None if not
      */
-    def toCC[T: ClassTag](pc: Element, classLoader: ClassLoader = defaultClassloader): Option[T] =
+    def toCC[T: ClassTag: TypeTag](pc: Element, classLoader: ClassLoader = defaultClassloader): Option[T] =
         _toCCPossible[T](pc, classLoader) match {
             case Some(serializedClass) =>
 
@@ -115,16 +117,15 @@ object ObjectConverter extends Log {
         }
 
     private def assignValue(pc: Element, attributeName: String, value: Any) {
-        val existingValue = pc.getProperty(attributeName)
         value match {
             case Some(x) =>
                 assignValue(pc, attributeName, x)
             case None =>
-                if(existingValue != null) {
+                if(pc.getProperty(attributeName) != null) {
                     pc.removeProperty(attributeName)
                 }
-            case x =>
-                if (existingValue != value) {
+            case _ =>
+                if(pc.getProperty(attributeName) != value) {
                     pc.setProperty(attributeName, value)
                 }
         }
@@ -160,7 +161,7 @@ object ObjectConverter extends Log {
      * throws a IllegalArgumentException if a Nodes properties
      * do not fit to the case class properties
      */
-    def deSerialize[T](pc: Element)(implicit tag: ClassTag[T]): T = {
+    def deSerialize[T](pc: Element)(implicit tag: ClassTag[T], typeTag: TypeTag[T]): T = {
         assert(pc != null, "duno how to deserialize null object :(")
         toCC[T](pc) match {
             case Some(t) => t

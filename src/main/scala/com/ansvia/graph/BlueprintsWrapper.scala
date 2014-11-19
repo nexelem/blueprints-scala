@@ -100,7 +100,7 @@ object BlueprintsWrapper {
          * @param db
          * @return
          */
-        def reload()(implicit db:Graph) = {
+        def reload[T: ClassTag: TypeTag]()(implicit db:Graph) = {
             _reloadInner(db)
         }
 
@@ -117,14 +117,14 @@ object BlueprintsWrapper {
          * Deserialize object to case class.
          * @tparam T case class type.
          */
-        def toCC[T: ClassTag]:Option[T] = toCC[T](defaultClassloader)
+        def toCC[T: ClassTag: TypeTag]:Option[T] = toCC[T](defaultClassloader)
 
       /**
        * Deserialize object to case class.
        * @tparam T case class type.
        * @param classLoader explicitly specified classloader if needed.
        */
-      def toCC[T: ClassTag](classLoader: ClassLoader):Option[T] = {
+      def toCC[T: ClassTag: TypeTag](classLoader: ClassLoader):Option[T] = {
         ObjectConverter.toCC[T](obj, classLoader)
       }
     }
@@ -532,7 +532,7 @@ object BlueprintsWrapper {
          * @param db implicit Graph db object.
          * @return this object with updated vertex.
          */
-        def reload()(implicit db:Graph):this.type = {
+        def reload[T: ClassTag: TypeTag]()(implicit db:Graph):this.type = {
             if (!isSaved)
                 throw NotBoundException("object %s not saved yet".format(this))
 
@@ -626,7 +626,7 @@ object BlueprintsWrapper {
          * @param db implicit Graph db object.
          * @return this object with updated vertex.
          */
-        override def reload()(implicit db: Graph) = {
+        override def reload[T: ClassTag: TypeTag]()(implicit db: Graph) = {
             if (id == _nullId && isSaved){
                 vertex match {
                     case iv:IdVertex =>
