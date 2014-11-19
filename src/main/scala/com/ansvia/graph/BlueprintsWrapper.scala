@@ -1,18 +1,17 @@
 package com.ansvia.graph
 
-import com.tinkerpop.blueprints._
 import java.lang.Iterable
-import com.tinkerpop.pipes.PipeFunction
-import com.tinkerpop.gremlin.java.GremlinPipeline
-import com.tinkerpop.pipes.util.FastNoSuchElementException
+
 import com.ansvia.graph.Exc.NotBoundException
+import com.tinkerpop.blueprints._
+import com.tinkerpop.blueprints.util.wrappers.id.{IdGraph, IdVertex}
+import com.tinkerpop.gremlin.java.GremlinPipeline
 import com.tinkerpop.pipes.util.structures.{Pair => BPPair}
 import sun.reflect.Reflection
+
+import scala.language.{implicitConversions, reflectiveCalls}
 import scala.reflect.ClassTag
 import scala.reflect.runtime.universe._
-import scala.language.implicitConversions
-import scala.language.reflectiveCalls
-import com.tinkerpop.blueprints.util.wrappers.id.{IdVertex, IdGraph}
 
 
 
