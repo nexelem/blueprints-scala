@@ -100,7 +100,7 @@ object BlueprintsWrapper {
          * @param db
          * @return
          */
-        def reload[T: ClassTag: TypeTag]()(implicit db:Graph) = {
+        def reload()(implicit db:Graph) = {
             _reloadInner(db)
         }
 
@@ -532,7 +532,7 @@ object BlueprintsWrapper {
          * @param db implicit Graph db object.
          * @return this object with updated vertex.
          */
-        def reload[T: ClassTag: TypeTag]()(implicit db:Graph):this.type = {
+        def reload()(implicit db:Graph):this.type = {
             if (!isSaved)
                 throw NotBoundException("object %s not saved yet".format(this))
 
@@ -626,7 +626,7 @@ object BlueprintsWrapper {
          * @param db implicit Graph db object.
          * @return this object with updated vertex.
          */
-        override def reload[T: ClassTag: TypeTag]()(implicit db: Graph) = {
+        override def reload()(implicit db: Graph) = {
             if (id == _nullId && isSaved){
                 vertex match {
                     case iv:IdVertex =>
