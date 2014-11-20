@@ -18,6 +18,8 @@ import reflect.ClassTag
 import scala.collection.mutable
 import com.ansvia.graph.Exc.BlueprintsScalaException
 
+import scala.reflect.runtime.universe.TypeTag
+
 object ObjectConverter extends Log {
 
     /**
@@ -45,12 +47,10 @@ object ObjectConverter extends Log {
 
         CaseClassDeserializer.serialize(cc).foreach {
             case (name, null) =>
-            case (name, value) => 
-
+            case (name, value) =>
                 try {
-                    if (pc.getProperty(name) != value)
-                        pc.setProperty(name, value)
-                }catch{
+                    assignValue(pc, name, value)
+                } catch{
                     case e:IllegalArgumentException =>
                         error("cannot set property %s <= %s\nerror: %s".format(name, value, e.getMessage))
                         throw e
@@ -69,7 +69,7 @@ object ObjectConverter extends Log {
      * Some(T) if possible
      * None if not
      */
-    def toCC[T: ClassTag](pc: Element, classLoader: ClassLoader = defaultClassloader): Option[T] =
+    def toCC[T: ClassTag: TypeTag](pc: Element, classLoader: ClassLoader = defaultClassloader): Option[T] =
         _toCCPossible[T](pc, classLoader) match {
             case Some(serializedClass) =>
 
@@ -116,6 +116,21 @@ object ObjectConverter extends Log {
             case _ => None
         }
 
+    private def assignValue(pc: Element, attributeName: String, value: Any) {
+        value match {
+            case Some(x) =>
+                assignValue(pc, attributeName, x)
+            case None =>
+                if(pc.getProperty(attributeName) != null) {
+                    pc.removeProperty(attributeName)
+                }
+            case _ =>
+                if(pc.getProperty(attributeName) != value) {
+                    pc.setProperty(attributeName, value)
+                }
+        }
+    }
+
     private def _toCCPossible[T](pc: Element, classLoader: ClassLoader)(implicit tag: ClassTag[T]): Option[Class[_]] = {
         val pv = pc.getProperty[String](CLASS_PROPERTY_NAME)
         if( pv != null ){
@@ -146,7 +161,7 @@ object ObjectConverter extends Log {
      * throws a IllegalArgumentException if a Nodes properties
      * do not fit to the case class properties
      */
-    def deSerialize[T](pc: Element)(implicit tag: ClassTag[T]): T = {
+    def deSerialize[T](pc: Element)(implicit tag: ClassTag[T], typeTag: TypeTag[T]): T = {
         assert(pc != null, "duno how to deserialize null object :(")
         toCC[T](pc) match {
             case Some(t) => t

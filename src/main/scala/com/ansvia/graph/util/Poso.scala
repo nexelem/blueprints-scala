@@ -1,15 +1,20 @@
 package com.ansvia.graph.util
 
-import scalax.rules.scalasig._
-import collection.mutable.ArrayBuffer
+import java.lang
 import java.lang.reflect
+import java.lang.reflect.ParameterizedType
+
 import com.ansvia.graph.BlueprintsWrapper.DbObject
-import collection.mutable
-import com.ansvia.graph.annotation.Persistent
-import annotation.tailrec
-import scala.reflect.ClassTag
-import scala.language.existentials
 import com.ansvia.graph.Log
+import com.ansvia.graph.annotation.Persistent
+import com.ansvia.graph.util.scalax.rules.scalasig._
+import com.ansvia.graph.util.scalax.rules.scalasig.{ MethodSymbol => SigMethodSymbol, NullaryMethodType => SigNullaryMethodType }
+
+import scala.collection.mutable
+import scala.collection.mutable.ArrayBuffer
+import scala.language.existentials
+import scala.reflect.ClassTag
+import scala.reflect.runtime.universe._
 
 /**
  * helper class to store Class object
@@ -39,14 +44,14 @@ object CaseClassDeserializer extends Log {
     /**
      * default behaviour for T == serialized class
      */
-    def deserialize[T](m: Map[String, AnyRef])(implicit tag: ClassTag[T]): T =
+    def deserialize[T](m: Map[String, AnyRef])(implicit tag: ClassTag[T], typeTag: TypeTag[T]): T =
         deserialize[T](tag.runtimeClass, m)
 
     /**
      * convenience method using class manifest
      * use it like <code>val test = deserialize[Test](myMap)<code>
      */
-    def deserialize[T](serializedClass: Class[_], m: Map[String, AnyRef])(implicit tag: ClassTag[T]): T =
+    def deserialize[T : ClassTag : TypeTag](serializedClass: Class[_], m: Map[String, AnyRef]): T =
         deserialize(m, JavaType(serializedClass)).asInstanceOf[T]
 
     /**
@@ -55,37 +60,13 @@ object CaseClassDeserializer extends Log {
      * @param m Map[String, AnyRef] map of parameter name an parameter type
      * @param javaTypeTarget JavaType case class class to create
      */
-    def deserialize(m: Map[String, AnyRef], javaTypeTarget: JavaType) = {
+    def deserialize[T: TypeTag](m: Map[String, AnyRef], javaTypeTarget: JavaType) = {
         require(javaTypeTarget.c.getConstructors.length == 1, "Case classes must only have one constructor.")
 
         val constructor = javaTypeTarget.c.getConstructors.head
         val params = sigParserCache.getOrElseUpdate(javaTypeTarget.c, CaseClassSigParser.parse(javaTypeTarget.c))
 
-        val values = new ArrayBuffer[AnyRef]
-        for ((paramName, paramType) <- params) {
-            val field = m.getOrElse(paramName, null)
-
-            field match {
-                // use null if the property does not exist
-                case null =>
-                    values += null
-
-                case x:java.lang.Integer if paramType.c == classOf[java.lang.Long] =>
-
-                    values += x
-
-                // if the value is directly assignable: use it
-                case x: AnyRef if (x.getClass.isAssignableFrom(paramType.c)) =>
-                    values += x
-                case x: Array[_] =>
-                    values += x
-                // otherwise try to create an instance using der String Constructor
-                case x: AnyRef =>
-                    val paramCtor = paramType.c.getConstructor(classOf[String])
-                    val value = paramCtor.newInstance(x).asInstanceOf[AnyRef]
-                    values += value
-            }
-        }
+        val values = buildValues(m, params)
 
         val paramsCount = constructor.getParameterTypes.length
         val ccParams = values.slice(0, paramsCount)
@@ -120,7 +101,7 @@ object CaseClassDeserializer extends Log {
                 symbols ++= rv
 
                 curClazz = curClazz.getSuperclass
-                done = curClazz == classOf[java.lang.Object] || curClazz == null
+                done = curClazz == classOf[Object] || curClazz == null
             }
 
             symbols
@@ -138,7 +119,7 @@ object CaseClassDeserializer extends Log {
                 case null =>
                     // skip null
 
-                case x:java.lang.Integer if paramType.c == classOf[java.lang.Long] =>
+                case x:Integer if paramType.c == classOf[lang.Long] =>
 
                     methods.get(paramNameSet).map(_.invoke(summoned, x))
 
@@ -156,6 +137,60 @@ object CaseClassDeserializer extends Log {
         }
 
         summoned
+    }
+
+    def buildValues[T: TypeTag](vertexParams: Map[String, AnyRef], classParams: Seq[(String, JavaType)]): ArrayBuffer[AnyRef] = {
+        val values = new ArrayBuffer[AnyRef]
+        for ((paramName, paramType) <- classParams) {
+            val field = vertexParams.getOrElse(paramName, null)
+
+            if(paramType.c == classOf[Option[_]]) {
+                values += handleOption(paramName, paramType, field)
+            } else {
+                values += handleRegularValue(paramType, field)
+            }
+        }
+        values
+    }
+
+    def handleOption[T](paramName: String, paramType: JavaType, field: AnyRef)(implicit tag: TypeTag[T]): AnyRef = {
+        val member = tag.tpe.members.find { _.name.decoded.trim == paramName }
+        val TypeRef(_, _, tpe) = member.get.typeSignature
+        val genericClass = if(!tpe.isEmpty) Some(tpe.head.typeSymbol.asClass) else None
+        val clazz = genericClass.map { runtimeMirror(tag.getClass.getClassLoader).runtimeClass _ }
+
+        val optionBuff = buildValues(Map(paramName -> field), Seq((paramName, JavaType(clazz.getOrElse(classOf[AnyRef])))))
+
+        if (optionBuff.head != null) {
+            Some(optionBuff.head)
+        } else {
+            None
+        }
+    }
+
+    def handleRegularValue(paramType: JavaType, field: AnyRef): AnyRef = {
+        field match {
+            // use null if the property does not exist
+            case null =>
+                if (paramType.c == classOf[Option[_]]) {
+                    None
+                } else {
+                    null
+                }
+            // if there is Long in case class and Integer in graph
+            case x: Integer if paramType.c == classOf[lang.Long] =>
+                x
+            // if the value is directly assignable: use it
+            case x: AnyRef if (x.getClass.isAssignableFrom(paramType.c)) =>
+                x
+            case x: Array[_] =>
+                x
+            // otherwise try to create an instance using der String Constructor
+            case x: AnyRef =>
+                val paramCtor = paramType.c.getConstructor(classOf[String])
+                val value = paramCtor.newInstance(x).asInstanceOf[AnyRef]
+                value
+        }
     }
 
     /**
@@ -361,12 +396,12 @@ object CaseClassSigParser {
                     }else{
                         false
                     }
-                }.map(_.asInstanceOf[MethodSymbol])
+                }.map(_.asInstanceOf[SigMethodSymbol])
                 .zipWithIndex
                 .flatMap {
                     case (ms, idx) => {
                         ms.infoType match {
-                            case NullaryMethodType(t: TypeRefType) =>
+                            case SigNullaryMethodType(t: TypeRefType) =>
                                 Some(ms.name -> typeRef2JavaType(t))
                             case _ =>
                                 None

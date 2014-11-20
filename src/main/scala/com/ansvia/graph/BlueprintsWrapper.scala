@@ -1,18 +1,17 @@
 package com.ansvia.graph
 
-import com.tinkerpop.blueprints._
 import java.lang.Iterable
-import com.tinkerpop.pipes.PipeFunction
-import com.tinkerpop.gremlin.java.GremlinPipeline
-import com.tinkerpop.pipes.util.FastNoSuchElementException
+
 import com.ansvia.graph.Exc.NotBoundException
+import com.tinkerpop.blueprints._
+import com.tinkerpop.blueprints.util.wrappers.id.{IdGraph, IdVertex}
+import com.tinkerpop.gremlin.java.GremlinPipeline
 import com.tinkerpop.pipes.util.structures.{Pair => BPPair}
 import sun.reflect.Reflection
+
+import scala.language.{implicitConversions, reflectiveCalls}
 import scala.reflect.ClassTag
 import scala.reflect.runtime.universe._
-import scala.language.implicitConversions
-import scala.language.reflectiveCalls
-import com.tinkerpop.blueprints.util.wrappers.id.{IdVertex, IdGraph}
 
 
 
@@ -118,14 +117,14 @@ object BlueprintsWrapper {
          * Deserialize object to case class.
          * @tparam T case class type.
          */
-        def toCC[T: ClassTag]:Option[T] = toCC[T](defaultClassloader)
+        def toCC[T: ClassTag: TypeTag]:Option[T] = toCC[T](defaultClassloader)
 
       /**
        * Deserialize object to case class.
        * @tparam T case class type.
        * @param classLoader explicitly specified classloader if needed.
        */
-      def toCC[T: ClassTag](classLoader: ClassLoader):Option[T] = {
+      def toCC[T: ClassTag: TypeTag](classLoader: ClassLoader):Option[T] = {
         ObjectConverter.toCC[T](obj, classLoader)
       }
     }
