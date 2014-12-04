@@ -4,7 +4,7 @@ organization := "com.ansvia.graph"
 
 name := "blueprints-scala"
 
-version := "0.1.41-nexelem-SNAPSHOT"
+version := "0.1.42-nexelem-SNAPSHOT"
 
 crossScalaVersions := Seq("2.10.0", "2.11.0")
 
