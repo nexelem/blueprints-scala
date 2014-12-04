@@ -21,8 +21,8 @@ libraryDependencies ++= Seq(
     "com.tinkerpop.gremlin" % "gremlin-groovy" % "2.5.0",
     "com.tinkerpop.gremlin" % "gremlin-java" % "2.5.0",
     "org.specs2" %% "specs2" % "2.3.13" % "test",
-    "com.thinkaurelius.titan" % "titan-core" % "0.5.0" % "provided",
-    "com.thinkaurelius.titan" % "titan-berkeleyje" % "0.5.0" % "test"
+    "com.thinkaurelius.titan" % "titan-core" % "0.5.2" % "provided",
+    "com.thinkaurelius.titan" % "titan-berkeleyje" % "0.5.2" % "test"
     )
 
 sonatypeSettings
