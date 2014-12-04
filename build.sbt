@@ -1,5 +1,3 @@
-import java.text.SimpleDateFormat
-
 import SonatypeKeys._
 
 organization := "com.ansvia.graph"
