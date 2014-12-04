@@ -6,6 +6,8 @@ name := "blueprints-scala"
 
 version := "0.1.42-nexelem-SNAPSHOT"
 
+scalaVersion := "2.11.0"
+
 crossScalaVersions := Seq("2.11.0", "2.10.0")
 
 scalacOptions := Seq("-unchecked", "-deprecation", "-feature", "-language:implicitConversions")
