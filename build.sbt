@@ -1,14 +1,12 @@
-import java.text.SimpleDateFormat
-
 import SonatypeKeys._
 
 organization := "com.ansvia.graph"
 
 name := "blueprints-scala"
 
-version := "0.1.41-nexelem-SNAPSHOT"
+version := "0.1.42-nexelem-SNAPSHOT"
 
-scalaVersion := "2.10.0"
+crossScalaVersions := Seq("2.10.0", "2.11.0")
 
 scalacOptions := Seq("-unchecked", "-deprecation", "-feature", "-language:implicitConversions")
 
@@ -17,12 +15,12 @@ resolvers ++= Seq(
     )
 
 libraryDependencies ++= Seq(
-    "org.scala-lang" % "scala-reflect" % "2.10.0",
+    "org.scala-lang" % "scala-reflect" % scalaVersion.value,
     "org.slf4j" % "slf4j-api" % "1.7.6",
     "com.tinkerpop.blueprints" % "blueprints-core" % "2.5.0",
     "com.tinkerpop.gremlin" % "gremlin-groovy" % "2.5.0",
     "com.tinkerpop.gremlin" % "gremlin-java" % "2.5.0",
-    "org.specs2" %% "specs2" % "1.14" % "test",
+    "org.specs2" %% "specs2" % "2.3.13" % "test",
     "com.thinkaurelius.titan" % "titan-core" % "0.5.0" % "provided",
     "com.thinkaurelius.titan" % "titan-berkeleyje" % "0.5.0" % "test"
     )

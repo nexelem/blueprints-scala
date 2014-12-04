@@ -300,7 +300,7 @@ object CaseClassSigParser {
             true
         else{
             clazz == classOf[java.lang.Object] ||
-            clazz == classOf[scala.ScalaObject] ||
+            clazz == classOf[scala.Any] ||
             clazz == classOf[scala.Product] ||
             clazz == classOf[scala.Serializable] ||
             clazz == classOf[DbObject] ||
