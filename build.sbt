@@ -27,6 +27,9 @@ libraryDependencies ++= Seq(
     "com.thinkaurelius.titan" % "titan-berkeleyje" % "0.5.2" % "test"
     )
 
+
+scalacOptions ++= Seq("-Xfatal-warnings")
+
 sonatypeSettings
 
 profileName := "com.ansvia"
