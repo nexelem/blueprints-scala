@@ -56,6 +56,19 @@ class ObjectConverterSpec extends Specification {
             "not saving non persisted var" ! dboic.noSaveNonPersistedVar ^
             "saved via __save__()" ! dboic.savedViaSaveMethod ^
             Step(dboic.close()) ^
+        p ^
+            "convert vertex to witbier case class #1" ! DoubleHandlingWithBeerStyles.witbierDefinedTest ^
+            "convert vertex to witbier case class #2" ! DoubleHandlingWithBeerStyles.witbierStyleTest ^
+            "convert vertex to witbier case class #3" ! DoubleHandlingWithBeerStyles.witbierAbvTest ^
+            "convert pale ale case class to vertex" ! DoubleHandlingWithBeerStyles.classPaleAleTest ^
+            "convert vertex back to pale ale case class #1" ! DoubleHandlingWithBeerStyles.paleAleDefinedTest ^
+            "convert vertex back to pale ale case class #2" ! DoubleHandlingWithBeerStyles.paleAleStyleTest ^
+            "convert vertex back to pale ale case class #3" ! DoubleHandlingWithBeerStyles.paleAleAbvTest ^
+            "convert ris case class to vertex" ! DoubleHandlingWithBeerStyles.classPaleAleTest ^
+            "convert vertex back to ris case class #1" ! DoubleHandlingWithBeerStyles.paleAleDefinedTest ^
+            "convert vertex back to ris case class #2" ! DoubleHandlingWithBeerStyles.paleAleStyleTest ^
+            "convert vertex back to ris case class #3" ! DoubleHandlingWithBeerStyles.paleAleAbvTest ^
+            Step(DoubleHandlingWithBeerStyles.close()) ^
     end
 
     object oc {
@@ -148,6 +161,41 @@ class ObjectConverterSpec extends Specification {
     }
 
 
+    object DoubleHandlingWithBeerStyles {
 
+        implicit val db = TinkerGraphFactory.createTinkerGraph()
+
+        val witbierVertex = db.addVertex(null)
+        witbierVertex.set("style", "witbier")
+        witbierVertex.set("abv", 3.3)
+        witbierVertex.set("_class_", "com.ansvia.graph.testing.model.Beer")
+        val witbier = ObjectConverter.toCC[Beer](witbierVertex)
+
+        val paleAle = Beer("pale ale", 5.5)
+        val savedPaleAleVertex = db.save(paleAle)
+        val savedPaleAle = ObjectConverter.toCC[Beer](savedPaleAleVertex)
+
+        val ris = Beer("Russian Imperial Stout", 12.33333)
+        val savedRisVertex = db.save(ris)
+        val savedRis = ObjectConverter.toCC[Beer](savedRisVertex)
+
+        def close(){
+            db.shutdown()
+        }
+
+        def witbierDefinedTest = witbier.isDefined must beTrue
+        def witbierStyleTest = witbier.get.style must beEqualTo("witbier")
+        def witbierAbvTest = witbier.get.abv must beEqualTo(3.3)
+
+        def classPaleAleTest = savedPaleAleVertex.get("_class_") must beEqualTo(Some("com.ansvia.graph.testing.model.Beer"))
+
+        def paleAleDefinedTest = savedPaleAle.isDefined must beTrue
+        def paleAleStyleTest = savedPaleAle.get.style must beEqualTo("pale ale")
+        def paleAleAbvTest = savedPaleAle.get.abv must beEqualTo(5.5)
+
+        def risDefinedTest = savedPaleAle.isDefined must beTrue
+        def risStyleTest = savedPaleAle.get.style must beEqualTo("Russian Imperial Stout")
+        def risAbvTest = savedPaleAle.get.abv must beEqualTo(12.33333)
+    }
 
 }

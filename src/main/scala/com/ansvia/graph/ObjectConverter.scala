@@ -113,7 +113,6 @@ object ObjectConverter extends Log {
 
             case _ => None
         }
-    
     private def assignValue(pc: Element, attributeName: String, value: Any) {
         value match {
             case Some(x) =>

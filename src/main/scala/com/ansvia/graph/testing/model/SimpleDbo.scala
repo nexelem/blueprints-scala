@@ -16,4 +16,5 @@ private[graph] case class IdSimpleDbo(a:String,var b:String) extends IdDbObject[
 private[graph] case class IdSimpleDboLong(a:String,var b:String) extends IdDbObject[Long]
 private[graph] case class IdSimpleDboOption(opt: Option[String] = None, a:String,var b:String) extends IdDbObject[Long]
 private[graph] case class IdSimpleDboVarOption(var opt: Option[String] = None, a:String,var b:String) extends IdDbObject[Long]
+private[graph] case class IdSimpleOptionDouble(opt: Option[Double] = None, a:String) extends IdDbObject[Long]
 
