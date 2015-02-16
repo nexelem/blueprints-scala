@@ -18,6 +18,7 @@ class DbObjectOptionalSpec extends Specification {
             "save NONE property" ! treesNonTx.getOptionalEntityNone ^
             "save SOME property" ! treesNonTx.getOptionalWithValue ^
             "reload Option attribute" ! treesNonTx.reload ^
+            "overwrite with None" ! treesNonTx.overwriteWithNone ^
             Step(treesNonTx.close()) ^
         end
 
@@ -68,6 +69,19 @@ class DbObjectOptionalSpec extends Specification {
             someDboSave.opt = None
             val dboReload2 = someDboSave.reload()
             dboReload2.opt must beEqualTo(Some("test"))
+        }
+
+        def overwriteWithNone = {
+            val someDbo = IdSimpleDboVarOption(opt=Some("some value"), a="d", b="f")
+            val someDboSave = someDbo.save().toCC[IdSimpleDboVarOption].get
+            someDboSave.opt must beEqualTo(Some("some value"))
+
+            someDboSave.opt = None
+            val noneDboSave = someDboSave.save().toCC[IdSimpleDboVarOption].get
+            noneDboSave.opt must beEqualTo(None)
+
+            val reloadedNoneDbo = noneDboSave.reload()
+            reloadedNoneDbo.opt must beEqualTo(None)
         }
     }
 
