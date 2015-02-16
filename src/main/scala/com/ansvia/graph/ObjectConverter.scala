@@ -113,13 +113,13 @@ object ObjectConverter extends Log {
 
             case _ => None
         }
-    
     private def assignValue(pc: Element, attributeName: String, value: Any) {
         value match {
             case Some(x) =>
                 assignValue(pc, attributeName, x)
             case None =>
-                // nop - we do nothing here, same as for null
+                pc.removeProperty(attributeName)
+                ()  // forced Unit
             case _ =>
                 if(pc.getProperty(attributeName) != value) {
                     pc.setProperty(attributeName, value)
