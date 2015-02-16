@@ -55,31 +55,6 @@ class DbObjectOptionalSpec extends Specification {
             opt must beEqualTo("opt")
         }
 
-        def getOptionalDoubleNone = {
-            val o = IdSimpleOptionDouble(a="test")
-            o.save()
-
-            val a: String = o.getVertex.getProperty("a")
-            a must be equalTo("test")
-
-            val optNone: Double = o.getVertex.getProperty("opt")
-            optNone must beNull
-
-            val read = o.getVertex.toCC[IdSimpleOptionDouble]
-            read.get.opt must beNone
-        }
-
-        def getOptionalDoubleValue = {
-            val o = IdSimpleOptionDouble(opt = Some(5.5), a="test")
-            o.save()
-
-            val opt: Double = o.getVertex.getProperty("opt")
-            opt must beEqualTo(5.5)
-
-            val read = o.getVertex.toCC[IdSimpleOptionDouble]
-            read.get.opt must be equalTo(Some(5.5))
-        }
-
         def reload = {
             val noneDbo = IdSimpleDboVarOption(opt=None, a="d", b="f")
             val noneDboSave = noneDbo.save().toCC[IdSimpleDboVarOption].get
