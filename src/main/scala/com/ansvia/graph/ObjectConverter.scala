@@ -118,7 +118,8 @@ object ObjectConverter extends Log {
             case Some(x) =>
                 assignValue(pc, attributeName, x)
             case None =>
-                // nop - we do nothing here, same as for null
+                pc.removeProperty(attributeName)
+                ()  // forced Unit
             case _ =>
                 if(pc.getProperty(attributeName) != value) {
                     pc.setProperty(attributeName, value)
