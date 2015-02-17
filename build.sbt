@@ -27,6 +27,19 @@ libraryDependencies ++= Seq(
     "com.thinkaurelius.titan" % "titan-berkeleyje" % "0.5.2" % "test"
     )
 
+
+scalacOptions ++= {
+  CrossVersion.partialVersion(scalaVersion.value) match {
+    // if scala 2.11+ is used, be strict about compiler warnings
+    case Some((2, scalaMajor)) if scalaMajor >= 11 =>
+      Seq("-Xfatal-warnings")
+    case _ =>
+      Nil
+  }
+}
+
+
+
 sonatypeSettings
 
 profileName := "com.ansvia"

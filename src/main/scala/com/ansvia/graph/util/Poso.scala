@@ -2,6 +2,7 @@ package com.ansvia.graph.util
 
 import java.lang
 import java.lang.reflect
+import java.util.concurrent.ConcurrentHashMap
 
 import com.ansvia.graph.BlueprintsWrapper.DbObject
 import com.ansvia.graph.Log
@@ -12,6 +13,8 @@ import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.language.existentials
 import scala.reflect.ClassTag
+
+import collection.JavaConversions._
 
 /**
  * helper class to store Class object
@@ -26,17 +29,14 @@ object CaseClassDeserializer extends Log {
     /**
      * Method Map cache for method serialize
      */
-    private val methodCache = new mutable.HashMap[Class[_], Map[String, java.lang.reflect.Method]]()
-        with mutable.SynchronizedMap[Class[_], Map[String, java.lang.reflect.Method]]
+    private val methodCache = new ConcurrentHashMap[Class[_], Map[String, java.lang.reflect.Method]]()
 
-    private val methodSetterCache = new mutable.HashMap[Class[_], Map[String, java.lang.reflect.Method]]()
-        with mutable.SynchronizedMap[Class[_], Map[String, java.lang.reflect.Method]]
+    private val methodSetterCache = new ConcurrentHashMap[Class[_], Map[String, java.lang.reflect.Method]]()
 
     /**
      * signature parser cache
      */
-    private val sigParserCache = new mutable.HashMap[Class[_], Seq[(String, JavaType)]]()
-        with mutable.SynchronizedMap[Class[_], Seq[(String, JavaType)]]
+    private val sigParserCache = new ConcurrentHashMap[Class[_], Seq[(String, JavaType)]]()
 
     /**
      * default behaviour for T == serialized class
@@ -287,13 +287,11 @@ object CaseClassSigParser {
         }
     }
 
-    private val persistedVarCache = new mutable.HashMap[Class[_], Array[String]]()
-        with mutable.SynchronizedMap[Class[_], Array[String]]
+    private val persistedVarCache: mutable.Map[Class[_], Array[String]] = new ConcurrentHashMap[Class[_], Array[String]]()
 //    private val traitItCache = new mutable.HashMap[Class[_], Seq[Class[_]]]()
 //        with mutable.SynchronizedMap[Class[_], Seq[Class[_]]]
 
-    private val classesTreeCache = new mutable.HashMap[Class[_], Array[Class[_]]]()
-        with mutable.SynchronizedMap[Class[_], Array[Class[_]]]
+    private val classesTreeCache = new ConcurrentHashMap[Class[_], Array[Class[_]]]()
 
     private def isExcluded(clazz: Class[_]) = {
         if (clazz == null)
