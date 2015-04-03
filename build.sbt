@@ -4,7 +4,7 @@ organization := "com.ansvia.graph"
 
 name := "blueprints-scala"
 
-version := "0.1.50-nexelem-SNAPSHOT"
+version := "0.1.52-nexelem-SNAPSHOT"
 
 scalaVersion := "2.11.0"
 
@@ -90,5 +90,10 @@ pomExtra := (
         <id>vikraman</id>
         <name>Vikraman Choudhury</name>
         <url>http://vh4x0r.wordpress.com</url>
+      </developer>
+      <developer>
+        <id>pdolega</id>
+        <name>Pawel Dolega</name>
+        <url>http://nexelem.com</url>
       </developer>
     </developers>)
