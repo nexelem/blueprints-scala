@@ -126,6 +126,20 @@ object ObjectConverter extends Log {
         }
     }
 
+    private def assignValue(pc: Element, attributeName: String, value: Any) {
+        value match {
+            case Some(x) =>
+                assignValue(pc, attributeName, x)
+            case None =>
+                pc.removeProperty(attributeName)
+                ()  // forced Unit
+            case _ =>
+                if(pc.getProperty(attributeName) != value) {
+                    pc.setProperty(attributeName, value)
+                }
+        }
+    }
+
     private def _toCCPossible[T](pc: Element, classLoader: ClassLoader)(implicit tag: ClassTag[T]): Option[Class[_]] = {
         val pv = pc.getProperty[String](CLASS_PROPERTY_NAME)
         if( pv != null ){
