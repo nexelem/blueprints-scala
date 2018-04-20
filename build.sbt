@@ -1,20 +1,14 @@
-import SonatypeKeys._
-
-organization := "com.ansvia.graph"
+organization := "com.ansvia.fallout.graph"
 
 name := "blueprints-scala"
 
-version := "0.1.61-nexelem-SNAPSHOT"
+version := "0.1.70"
 
 scalaVersion := "2.11.0"
 
 crossScalaVersions := Seq("2.11.0", "2.10.0")
 
 scalacOptions := Seq("-unchecked", "-deprecation", "-feature", "-language:implicitConversions")
-
-resolvers ++= Seq(
-    "nexelem repo" at "http://nexus.nexelem.com:8081/nexus/content/groups/public"
-    )
 
 libraryDependencies ++= Seq(
     "org.scala-lang" % "scala-reflect" % scalaVersion.value,
@@ -39,21 +33,9 @@ scalacOptions ++= {
   }
 }
 
+bintrayOrganization := Some("fallout")
 
-
-sonatypeSettings
-
-profileName := "com.ansvia"
-
-publishTo := Some("Nexelem Nexus" at "http://nexus.nexelem.com:8081/nexus/content/repositories/snapshots")
-
-credentials += Credentials {
-    val sonatype = Path.userHome / ".ivy2" / ".credentials-sonatype"
-    if (new File(sonatype.toString).exists())
-        sonatype
-    else
-        Path.userHome / ".ivy2" / ".credentials"
-}
+licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
 
 publishArtifact in Test := false
 
