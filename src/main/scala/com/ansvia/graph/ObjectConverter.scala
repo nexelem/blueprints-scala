@@ -7,9 +7,10 @@ package com.ansvia.graph
  * Time: 5:21 AM
  *
  */
+
 import collection.JavaConversions._
 import com.tinkerpop.blueprints.{Vertex, Element}
-import util.CaseClassDeserializer
+import com.ansvia.graph.util.{CallersContext, CaseClassDeserializer}
 import com.ansvia.graph.BlueprintsWrapper.DbObject
 import reflect.ClassTag
 import scala.collection.mutable
@@ -24,13 +25,14 @@ object ObjectConverter extends Log {
      */
     var CLASS_PROPERTY_NAME = "_class_"
 
+    val defaultClassloader = CallersContext.fetchDefaultClassLoader
+
     /**
      * serializes a given case class into a Node instance
      * for null values not property will be set
      */
     def serialize[T <: Element](cc: AnyRef, pc: Element, newElement:Boolean): T = {
         assert(cc != null, "duno how to serialize null object :(")
-
         if (newElement){
             val clz = pc.getProperty[String](CLASS_PROPERTY_NAME)
             if (clz != null)
@@ -41,12 +43,10 @@ object ObjectConverter extends Log {
 
         CaseClassDeserializer.serialize(cc).foreach {
             case (name, null) =>
-            case (name, value) => 
-
+            case (name, value) =>
                 try {
-                    if (pc.getProperty(name) != value)
-                        pc.setProperty(name, value)
-                }catch{
+                    assignValue(pc, name, value)
+                } catch{
                     case e:IllegalArgumentException =>
                         error("cannot set property %s <= %s\nerror: %s".format(name, value, e.getMessage))
                         throw e
@@ -65,8 +65,8 @@ object ObjectConverter extends Log {
      * Some(T) if possible
      * None if not
      */
-    def toCC[T: ClassTag](pc: Element): Option[T] =
-        _toCCPossible[T](pc) match {
+    def toCC[T: ClassTag](pc: Element, classLoader: ClassLoader = defaultClassloader): Option[T] =
+        _toCCPossible[T](pc, classLoader) match {
             case Some(serializedClass) =>
 
                 var kv:mutable.Set[(String, AnyRef)] = null
@@ -112,12 +112,25 @@ object ObjectConverter extends Log {
             case _ => None
         }
 
-    private def _toCCPossible[T](pc: Element)(implicit tag: ClassTag[T]): Option[Class[_]] = {
+    private def assignValue(pc: Element, attributeName: String, value: Any) {
+        value match {
+            case Some(x) =>
+                assignValue(pc, attributeName, x)
+            case None =>
+                pc.removeProperty(attributeName)
+                ()  // forced Unit
+            case _ =>
+                if(pc.getProperty(attributeName) != value) {
+                    pc.setProperty(attributeName, value)
+                }
+        }
+    }
 
+    private def _toCCPossible[T](pc: Element, classLoader: ClassLoader)(implicit tag: ClassTag[T]): Option[Class[_]] = {
         val pv = pc.getProperty[String](CLASS_PROPERTY_NAME)
         if( pv != null ){
             val cpn = pv.toString
-            val c = Class.forName(cpn)
+            val c = Class.forName(cpn, true, classLoader)
             if (tag.runtimeClass.isAssignableFrom(c))
                 Some(c)
             else
@@ -132,8 +145,8 @@ object ObjectConverter extends Log {
      * only checks if this property container has been serialized
      * with T
      */
-    def toCCPossible[T: ClassTag](pc: Element): Boolean =
-        _toCCPossible[T](pc) match {
+    def toCCPossible[T: ClassTag](pc: Element, classLoader: ClassLoader = defaultClassloader): Boolean =
+        _toCCPossible[T](pc, classLoader) match {
             case Some(_) => true
             case _ => false
         }
